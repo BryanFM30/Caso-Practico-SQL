@@ -1,3 +1,5 @@
+-- 1. Explorar la tabla “menu_items” para conocer los productos del menú.
+
 SELECT COUNT(*) AS total_articulos
 FROM menu_items;
 --------------
@@ -23,6 +25,9 @@ WHERE category = 'American';
 SELECT AVG(price) AS precio_promedio
 FROM menu_items;
 --------------------------------
+
+-- 2. Explorar la tabla “order_details” para conocer los datos que han sido recolectados.
+
 
 SELECT COUNT(DISTINCT order_id) AS total_pedidos_unicos
 FROM order_details;
@@ -64,6 +69,9 @@ FROM order_details
 WHERE order_date BETWEEN '2023-01-01' AND '2023-01-05';
 ---------------------------
 
+---- Identificar 5 puntos clave que puedan ser de utilidad para los dueños del restaurante en el lanzamiento de su nuevo menú.
+
+
 SELECT 
     od.*,
     mi.*
@@ -85,6 +93,8 @@ LEFT JOIN menu_items AS mi
     ON od.item_id = mi.menu_item_id;
 
 ----------------------------------------
+-- Top 5 mas vendidos
+
 WITH ventas AS (
     SELECT 
         od.order_id,
@@ -107,6 +117,7 @@ GROUP BY item_name, category
 ORDER BY veces_pedido DESC
 LIMIT 5;
 -----------------
+-- Top 5 menos vendidos
 
 WITH ventas AS (
     SELECT 
@@ -128,7 +139,7 @@ SELECT
 FROM ventas
 GROUP BY item_name, category
 ORDER BY veces_pedido ASC
-LIMIT 6;
+LIMIT 5;
 ------------------------------
 
 WITH ventas AS (
