@@ -1,0 +1,200 @@
+SELECT COUNT(*) AS total_articulos
+FROM menu_items;
+--------------
+
+--barato
+SELECT *
+FROM menu_items
+ORDER BY price ASC
+LIMIT 1;
+
+--caro
+SELECT *
+FROM menu_items
+ORDER BY price DESC
+LIMIT 1;
+-------------------------------
+
+SELECT COUNT(*) AS total_platos_americanos
+FROM menu_items
+WHERE category = 'American';
+-------------------------------
+
+SELECT AVG(price) AS precio_promedio
+FROM menu_items;
+--------------------------------
+
+SELECT COUNT(DISTINCT order_id) AS total_pedidos_unicos
+FROM order_details;
+
+-------------------------------
+
+WITH top5 AS (
+    SELECT 
+        order_id,
+        COUNT(*) AS cantidad_articulos
+    FROM order_details
+    GROUP BY order_id
+    ORDER BY cantidad_articulos DESC
+    LIMIT 5
+)
+SELECT 
+    t.order_id,
+    t.cantidad_articulos,
+    mi.item_name,
+    mi.category,
+    mi.price
+FROM top5 AS t
+JOIN order_details AS od
+    ON t.order_id = od.order_id
+JOIN menu_items AS mi
+    ON od.item_id = mi.menu_item_id
+ORDER BY t.cantidad_articulos DESC, t.order_id, mi.item_name;
+
+----------------------------------------------
+
+SELECT 
+    MIN(order_date) AS primer_pedido,
+    MAX(order_date) AS ultimo_pedido
+FROM order_details;
+------------------------------------------------
+
+SELECT COUNT(DISTINCT order_id) AS pedidos_en_rango
+FROM order_details
+WHERE order_date BETWEEN '2023-01-01' AND '2023-01-05';
+---------------------------
+
+SELECT 
+    od.*,
+    mi.*
+FROM order_details AS od
+LEFT JOIN menu_items AS mi
+    ON od.item_id = mi.menu_item_id;
+
+--------------------------
+SELECT 
+    od.order_id,
+    od.item_id,
+    od.order_date,
+    mi.menu_item_id,
+    mi.item_name,
+    mi.category,
+    mi.price
+FROM order_details AS od
+LEFT JOIN menu_items AS mi
+    ON od.item_id = mi.menu_item_id;
+
+----------------------------------------
+WITH ventas AS (
+    SELECT 
+        od.order_id,
+        od.order_date,
+        od.item_id,
+        mi.menu_item_id,
+        mi.item_name,
+        mi.category,
+        mi.price
+    FROM order_details AS od
+    LEFT JOIN menu_items AS mi
+        ON od.item_id = mi.menu_item_id
+)
+SELECT 
+    item_name,
+    category,
+    COUNT(*) AS veces_pedido
+FROM ventas
+GROUP BY item_name, category
+ORDER BY veces_pedido DESC
+LIMIT 5;
+-----------------
+
+WITH ventas AS (
+    SELECT 
+        od.order_id,
+        od.order_date,
+        od.item_id,
+        mi.menu_item_id,
+        mi.item_name,
+        mi.category,
+        mi.price
+    FROM order_details AS od
+    LEFT JOIN menu_items AS mi
+        ON od.item_id = mi.menu_item_id
+)
+SELECT 
+    item_name,
+    category,
+    COUNT(*) AS veces_pedido
+FROM ventas
+GROUP BY item_name, category
+ORDER BY veces_pedido ASC
+LIMIT 6;
+------------------------------
+
+WITH ventas AS (
+    SELECT 
+        od.order_id,
+        od.order_date,
+        od.item_id,
+        mi.menu_item_id,
+        mi.item_name,
+        mi.category,
+        mi.price
+    FROM order_details AS od
+    LEFT JOIN menu_items AS mi
+        ON od.item_id = mi.menu_item_id
+)
+SELECT 
+    category,
+    COUNT(*) AS articulos_vendidos
+FROM ventas
+GROUP BY category
+ORDER BY articulos_vendidos DESC;
+
+-------------------------------------
+
+WITH ventas AS (
+    SELECT 
+        TO_CHAR(od.order_date, 'Day') AS dia_semana,
+        mi.price
+    FROM order_details od
+    LEFT JOIN menu_items mi
+        ON od.item_id = mi.menu_item_id
+)
+SELECT 
+    TRIM(dia_semana) AS dia_semana,
+    COUNT(*) AS articulos_vendidos,
+    SUM(price) AS ingresos_totales
+FROM ventas
+GROUP BY dia_semana
+ORDER BY articulos_vendidos DESC;
+
+--------------------------------------------
+
+WITH ventas AS (
+    SELECT 
+        od.order_id,
+        mi.menu_item_id,
+        mi.item_name
+    FROM order_details AS od
+    LEFT JOIN menu_items AS mi
+        ON od.item_id = mi.menu_item_id
+),
+pares AS (
+    SELECT 
+        v1.item_name AS item_1,
+        v2.item_name AS item_2,
+        COUNT(*) AS veces_juntos
+    FROM ventas v1
+    JOIN ventas v2
+        ON v1.order_id = v2.order_id
+       AND v1.menu_item_id < v2.menu_item_id   
+    GROUP BY v1.item_name, v2.item_name
+)
+SELECT 
+    item_1,
+    item_2,
+    veces_juntos
+FROM pares
+ORDER BY veces_juntos DESC
+LIMIT 5;
