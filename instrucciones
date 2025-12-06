@@ -1,26 +1,32 @@
 -- 1. Explorar la tabla “menu_items” para conocer los productos del menú.
 
+-Encontrar el número de artículos en el menú.
+
 SELECT COUNT(*) AS total_articulos
 FROM menu_items;
 --------------
 
---barato
+--Artículo menos caro
 SELECT *
 FROM menu_items
 ORDER BY price ASC
 LIMIT 1;
 
---caro
+--Artículo más barato
 SELECT *
 FROM menu_items
 ORDER BY price DESC
 LIMIT 1;
 -------------------------------
 
+--Platos americanos
+
 SELECT COUNT(*) AS total_platos_americanos
 FROM menu_items
 WHERE category = 'American';
 -------------------------------
+
+--Precio promedio
 
 SELECT AVG(price) AS precio_promedio
 FROM menu_items;
@@ -28,11 +34,14 @@ FROM menu_items;
 
 -- 2. Explorar la tabla “order_details” para conocer los datos que han sido recolectados.
 
+-Pedidos únicos se realizaron en total
 
 SELECT COUNT(DISTINCT order_id) AS total_pedidos_unicos
 FROM order_details;
 
 -------------------------------
+
+-5 pedidos que tuvieron el mayor número de artículos
 
 WITH top5 AS (
     SELECT 
@@ -58,11 +67,15 @@ ORDER BY t.cantidad_articulos DESC, t.order_id, mi.item_name;
 
 ----------------------------------------------
 
+-¿Cuándo se realizó el primer pedido y el último pedido?
+
 SELECT 
     MIN(order_date) AS primer_pedido,
     MAX(order_date) AS ultimo_pedido
 FROM order_details;
 ------------------------------------------------
+
+-¿Cuántos pedidos se hicieron entre el '2023-01-01' y el '2023-01-05'?
 
 SELECT COUNT(DISTINCT order_id) AS pedidos_en_rango
 FROM order_details
@@ -80,6 +93,8 @@ LEFT JOIN menu_items AS mi
     ON od.item_id = mi.menu_item_id;
 
 --------------------------
+
+
 SELECT 
     od.order_id,
     od.item_id,
@@ -93,7 +108,6 @@ LEFT JOIN menu_items AS mi
     ON od.item_id = mi.menu_item_id;
 
 ----------------------------------------
--- Top 5 mas vendidos
 
 WITH ventas AS (
     SELECT 
@@ -117,7 +131,8 @@ GROUP BY item_name, category
 ORDER BY veces_pedido DESC
 LIMIT 5;
 -----------------
--- Top 5 menos vendidos
+
+-- Ver que día es el que se vende menos y así poder aplicar alguna promoción
 
 WITH ventas AS (
     SELECT 
@@ -141,6 +156,7 @@ GROUP BY item_name, category
 ORDER BY veces_pedido ASC
 LIMIT 5;
 ------------------------------
+
 
 WITH ventas AS (
     SELECT 
@@ -181,6 +197,11 @@ GROUP BY dia_semana
 ORDER BY articulos_vendidos DESC;
 
 --------------------------------------------
+
+
+-Retomando parte del punto anterior podemos ver que artículos se llevan juntos y aplicar una promoción que con dichos productos juntos,
+que por una X cantidad (en pesos) extra se pueden llevar otro producto:
+
 
 WITH ventas AS (
     SELECT 
